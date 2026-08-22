@@ -14,7 +14,7 @@ class SmsmisrResponse
 
     public static function fromArray(array $data): static
     {
-        $code = $data['code'] ?? 0;
+        $code = $data['code'] ?? $data['Code'] ?? 0;
 
         $successCodes = [
             Smsmisr::SMSMISR_SUCCESS_CODE,
