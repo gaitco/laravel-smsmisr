@@ -235,4 +235,26 @@ class SmsmisrTest extends TestCase
                 && str_contains($url, 'password=test_pass');
         });
     }
+
+    // --- Key normalisation (issue #8) ---
+
+    public function test_capitalised_response_keys_are_normalised(): void
+    {
+        Http::fake(['*' => Http::response(['Code' => 1901, 'Message' => 'Success', 'SMSID' => 'abc'])]);
+
+        $response = app('smsmisr')->send('Hello', '01012345678');
+
+        $this->assertEquals(1901, $response->code);
+        $this->assertEquals('Success', $response->message);
+        $this->assertTrue($response->isSuccessful());
+        $this->assertEquals('abc', $response->toArray()['smsid']);
+    }
+
+    public function test_capitalised_error_code_still_maps_to_typed_exception(): void
+    {
+        Http::fake(['*' => Http::response(['Code' => 1902, 'Message' => 'Bad creds'])]);
+
+        $this->expectException(SmsmisrAuthenticationException::class);
+        app('smsmisr')->send('Hello', '01012345678');
+    }
 }

@@ -398,7 +398,9 @@ class Smsmisr
             ->withQueryParameters($query)
             ->send($method, $endpoint);
 
-        return $response->json();
+        // The API capitalises keys (`Code`, `Message`) despite documenting
+        // lowercase ones; normalise once here so every consumer sees `code`.
+        return array_change_key_case($response->json() ?? [], CASE_LOWER);
     }
 
     /**
